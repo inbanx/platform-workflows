@@ -92,7 +92,7 @@ jobs:
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.gh_token }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ steps.release_branch.outputs.release_branch }}
 
       - name: Create Pull Request
@@ -108,7 +108,7 @@ jobs:
       - name: Add label to PR
         uses: actions/github-script@v5
         with:
-          github-token: ${{ secrets.gh_token }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             github.rest.issues.addLabels({
               issue_number: ${{ steps.create_pull_request.outputs.pull-request-number }},
@@ -120,7 +120,7 @@ jobs:
       - name: Approve PR
         uses: hmarr/auto-approve-action@v2
         with:
-          github-token: ${{ secrets.gh_token }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           pull-request-number: ${{ steps.create_pull_request.outputs.pull-request-number }}
 
       - name: Merge pull request
