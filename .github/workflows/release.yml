@@ -123,3 +123,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GIT_APPROVE_TOKEN }}
         run: |
           gh pr edit ${{ steps.create_pull_request.outputs.pull-request-number }} --remove-label automerge
+
+      - name: Transition issue to done
+        uses: atlassian/gajira-transition@master
+        with:
+          issue: ${{ steps.create.outputs.issue }}
+          transition: "Done"
