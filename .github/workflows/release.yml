@@ -100,6 +100,7 @@ jobs:
             Bump release ${{ steps.get_draft_release_version.outputs.draft_release_version }}
           labels: |
             patch
+            automerge
 
       - name: Auto merge
         id: automerge
