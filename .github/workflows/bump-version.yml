@@ -25,7 +25,7 @@ jobs:
           ref: ${{ github.ref }}
       - name: Get npm version
         id: package-version
-        uses: inbanx/platform-workflows/actions/package-version@BNI-88
+        uses: inbanx/platform-workflows/actions/package-version@main
       - name: Tag commit
         uses: tvdias/github-tagger@v0.0.1
         if: steps.version-updated.outputs.has-updated

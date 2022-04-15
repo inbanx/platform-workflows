@@ -47,7 +47,7 @@ jobs:
           git config --global user.name "${{ secrets.GIT_USER_NAME }}"
 
       - name: Configure publish scope
-        uses: inbanx/platform-workflows/actions/registry@BNI-88
+        uses: inbanx/platform-workflows/actions/registry@main
         with:
           npm-auth-token: ${{ secrets.NPM_AUTH_TOKEN }}
           npm-registry: ${{ inputs.npm-registry }}
@@ -55,7 +55,7 @@ jobs:
 
       - name: Get draft release version
         id: get_draft_release_version
-        uses: inbanx/platform-workflows/actions/release-draft@BNI-88
+        uses: inbanx/platform-workflows/actions/release-draft@main
 
       - name: Login
         uses: atlassian/gajira-login@master
@@ -82,7 +82,7 @@ jobs:
 
       - name: Create release branch
         id: release_branch
-        uses: inbanx/platform-workflows/actions/release-branch@BNI-88
+        uses: inbanx/platform-workflows/actions/release-branch@main
         with:
           branch: automation-release-${{ steps.create.outputs.issue }}
 
