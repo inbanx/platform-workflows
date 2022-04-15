@@ -19,6 +19,7 @@ jobs:
           tag: v${{ steps.version-updated.outputs.current-package-version }}
           publish: true
       - name: Update a draft release
+        uses: release-drafter/release-drafter@v5
         if: ${{ !steps.version-updated.outputs.has-updated }}
         with:
           config-name: changelog-generator.yml
