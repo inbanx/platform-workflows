@@ -100,8 +100,12 @@ jobs:
             Bump release ${{ steps.get_draft_release_version.outputs.draft_release_version }}
           labels: |
             patch
-      - name: Merge PR
+            automerge
+
+      - name: Auto merge
+        id: automerge
+        uses: pascalgn/automerge-action@v0.15.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr merge ${{ steps.create_pull_request.outputs.pull-request-number }} --admin -s
+          PULL_REQUEST: ${{ steps.create_pull_request.outputs.pull-request-number }}
+          MERGE_METHOD: squash
