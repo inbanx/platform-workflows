@@ -6,9 +6,11 @@ on:
       npm-registry:
         description: npm registry server url
         required: true
+        type: string
       npm-scope:
         description: npm package scope
         required: true
+        type: string
     secrets:
       NPM_AUTH_TOKEN:
         description: "npm user auth token"
