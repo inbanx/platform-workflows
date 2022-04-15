@@ -1,0 +1,29 @@
+name: Get draft release version
+description: Get version from draft release
+outputs:
+  draft_release_version:
+    description: Draft release version
+    value: ${{ steps.get_release_without_v.outputs.draft_release_version}}
+runs:
+  using: 'composite'
+  steps:
+    - name: Get latest draft release
+      id: get_release
+      uses: actions/github-script@v4.1.0
+      with:
+        script: |
+          const releasesList = await github.repos.listReleases({
+            owner: context.repo.owner,
+            repo: context.repo.repo
+          })
+
+          const draftRelease = releasesList.data.find(r => r.draft)
+
+          return draftRelease.tag_name
+    - name: Set version to release in output
+      id: get_release_without_v
+      run: |
+        echo ::set-output name=draft_release_version::$(echo $generated_tag_with_v | sed -e s#v##g)
+      env:
+        generated_tag_with_v: ${{ steps.get_release.outputs.result }}
+      shell: bash

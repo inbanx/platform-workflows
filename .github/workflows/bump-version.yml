@@ -1,0 +1,35 @@
+name: Bump version
+
+on:
+  workflow_call:
+    inputs:
+      name_prefix:
+        default: v
+        required: false
+        description: The prefix to use for the git tag
+        type: string
+
+jobs:
+  bump-version:
+    name: Bump version on main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if version updated
+        uses: MontyD/package-json-updated-action@1.0.1
+        id: version-updated
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout source code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+      - name: Get npm version
+        id: package-version
+        uses: inbanx/platform-workflows/actions/package-version@main
+      - name: Tag commit
+        uses: tvdias/github-tagger@v0.0.1
+        if: steps.version-updated.outputs.has-updated
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ inputs.name_prefix }}${{ steps.package-version.outputs.current-version }}
+

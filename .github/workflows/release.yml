@@ -1,0 +1,131 @@
+name: Release
+
+on:
+  workflow_call:
+    inputs:
+      npm-registry:
+        description: npm registry server url
+        required: true
+        type: string
+      npm-scope:
+        description: npm package scope
+        required: true
+        type: string
+    secrets:
+      GIT_APPROVE_TOKEN:
+        description: "git service PAT token"
+        required: true
+      GIT_USER_NAME:
+        description: "git service user"
+        required: true
+      GIT_USER_EMAIL:
+        description: "git service email"
+        required: true
+      NPM_AUTH_TOKEN:
+        description: "npm user auth token"
+        required: true
+      JIRA_BASE_URL:
+        description: "The team JIRA Base URL"
+        required: true
+      JIRA_USER:
+        description: "A JIRA user with permission to create a ticket"
+        required: true
+      JIRA_API_TOKEN:
+        description: "An authentication token for the desired JIRA user with permission to create a ticket"
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure git
+        run: |
+          git config --global user.email "${{ secrets.GIT_USER_EMAIL }}"
+          git config --global user.name "${{ secrets.GIT_USER_NAME }}"
+
+      - name: Configure publish scope
+        uses: inbanx/platform-workflows/actions/registry@main
+        with:
+          npm-auth-token: ${{ secrets.NPM_AUTH_TOKEN }}
+          npm-registry: ${{ inputs.npm-registry }}
+          npm-scope: ${{ inputs.npm-scope }}
+
+      - name: Get draft release version
+        id: get_draft_release_version
+        uses: inbanx/platform-workflows/actions/release-draft@main
+
+      - name: Login
+        uses: atlassian/gajira-login@master
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+      - name: Create Jira
+        id: create
+        uses: atlassian/gajira-create@master
+        with:
+          project: IPA
+          issuetype: Task
+          summary: |
+            Release ${{ github.repository }} ${{ steps.get_draft_release_version.outputs.draft_release_version }}
+          description: Release ${{ github.repository }} ${{ steps.get_draft_release_version.outputs.draft_release_version }}
+
+      - name: Transition issue
+        uses: atlassian/gajira-transition@master
+        with:
+          issue: ${{ steps.create.outputs.issue }}
+          transition: "In progress"
+
+      - name: Create release branch
+        id: release_branch
+        uses: inbanx/platform-workflows/actions/release-branch@main
+        with:
+          branch: automation-release-${{ steps.create.outputs.issue }}
+
+      - name: Bump version and commit
+        run: |
+          npm version ${{ steps.get_draft_release_version.outputs.draft_release_version }} --no-git-tag-version
+
+      - name: Create Pull Request
+        id: create_pull_request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          branch: ${{ steps.release_branch.outputs.release_branch }}
+          title: "[${{ steps.create.outputs.issue }}] Release ${{ steps.get_draft_release_version.outputs.draft_release_version }}"
+          base: "main"
+          add-paths: |
+            package.json
+          body: |
+            Bump release ${{ steps.get_draft_release_version.outputs.draft_release_version }}
+          labels: |
+            patch
+            automerge
+      - name: Approval PR
+        id: pr-review
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_APPROVE_TOKEN }}
+        run: |
+          gh pr review ${{ steps.create_pull_request.outputs.pull-request-number }} -a
+
+      - name: Auto merge
+        id: automerge
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_APPROVE_TOKEN }}
+        run: |
+          gh pr merge ${{ steps.create_pull_request.outputs.pull-request-number }} --auto -s
+
+      - name: Remove label
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_APPROVE_TOKEN }}
+        run: |
+          gh pr edit ${{ steps.create_pull_request.outputs.pull-request-number }} --remove-label automerge
+
+      - name: Transition issue to done
+        uses: atlassian/gajira-transition@master
+        with:
+          issue: ${{ steps.create.outputs.issue }}
+          transition: "Done"

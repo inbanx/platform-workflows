@@ -1,0 +1,32 @@
+name: Release drafter
+
+on:
+  workflow_call:
+    secrets:
+      GIT_APPROVE_TOKEN:
+        description: "git service PAT token"
+        required: true
+
+jobs:
+  update_release:
+    env:
+      GITHUB_TOKEN: ${{ secrets.GIT_APPROVE_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Detect version updated
+        id: version-updated
+        uses: MontyD/package-json-updated-action@1.0.1
+      - name: Publish the draft release
+        if: steps.version-updated.outputs.has-updated
+        uses: release-drafter/release-drafter@v5
+        with:
+          config-name: changelog-generator.yml
+          tag: v${{ steps.version-updated.outputs.current-package-version }}
+          publish: true
+      - name: Update a draft release
+        uses: release-drafter/release-drafter@v5
+        if: ${{ !steps.version-updated.outputs.has-updated }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          config-name: changelog-generator.yml

@@ -1,0 +1,9 @@
+name: package version
+description: get version from package.json
+
+runs:
+  using: 'composite'
+  steps:
+    - run: |
+      echo ::set-output name=current-version::$(node -e 'console.log(require("./package.json").version)')
+
