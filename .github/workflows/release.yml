@@ -12,6 +12,9 @@ on:
         required: true
         type: string
     secrets:
+      GIT_APPROVE_TOKEN:
+        description: "git service PAT token"
+        required: true
       GIT_USER_NAME:
         description: "git service user"
         required: true
