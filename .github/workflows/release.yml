@@ -109,7 +109,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_APPROVE_TOKEN }}
         run: |
-          gh pr review -a ${{ steps.create_pull_request.outputs.pull-request-number }}
+          gh pr review ${{ steps.create_pull_request.outputs.pull-request-number }} -a
 
       - name: Auto merge
         id: automerge
