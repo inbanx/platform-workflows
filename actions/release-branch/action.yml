@@ -1,0 +1,25 @@
+name: Create release branch
+description: Create a release branch
+inputs:
+  branch:
+    description: Release branch name
+    required: true
+outputs:
+  release_branch:
+    description: Release branch name
+    value: ${{ steps.get_release_branch.outputs.release_branch }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Create release branch
+      id: release_branch
+      uses: peterjgrainger/action-create-branch@v2.0.1
+      with:
+        branch: ${{ inputs.branch }}
+    - name: Set release branch in output
+      id: get_release_branch
+      run: |
+        echo ::set-output name=release_branch::$(echo $release_branch)
+      env:
+        release_branch: ${{ inputs.branch }}
+      shell: bash

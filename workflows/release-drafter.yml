@@ -1,0 +1,24 @@
+name: Release drafter
+
+on:
+  workflow_call:
+
+jobs:
+  update_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Detect version updated
+        id: version-updated
+        uses: MontyD/package-json-updated-action@1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Draft a new release
+        if: steps.version-updated.outputs.has-updated
+        with:
+          config-name: changelog-generator.yml
+          tag: v${{ steps.version-updated.outputs.current-package-version }}
+          publish: true
+      - name: Update a draft release
+        if: ${{ !steps.version-updated.outputs.has-updated }}
+        with:
+          config-name: changelog-generator.yml

@@ -1,0 +1,8 @@
+name: Yarn publish
+description: Publish the package
+runs:
+  using: 'composite'
+  steps:
+    - run: |
+        yarn npm publish
+      shell: bash

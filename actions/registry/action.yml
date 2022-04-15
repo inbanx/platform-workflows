@@ -1,0 +1,18 @@
+name: Yarn config scoped registry
+description: Configure yarn to use scoped registry
+inputs:
+  npm-auth-token:
+    description: NPM Authentication token
+    required: true
+  npm-registry:
+    description: NPM Registry server
+    required: true
+  npm-scope:
+    description: NPM Scope id, without the @ sign
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - run: |
+        yarn config set --json npmScopes.${{ inputs.npm-scope }} '{"npmPublishRegistry":"${{ inputs.npm-registry }}","npmRegistryServer":"${{ inputs.npm-registry }}","npmAuthToken":"${{ inputs.npm-auth-token }}","npmAlwaysAuth": true}'
+      shell: bash
