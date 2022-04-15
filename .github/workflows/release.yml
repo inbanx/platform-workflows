@@ -59,7 +59,7 @@ jobs:
         id: create
         uses: atlassian/gajira-create@master
         with:
-          project: WEB
+          project: IPA
           issuetype: Task
           summary: |
             Release ${{ github.repository }} ${{ steps.get_draft_release_version.outputs.draft_release_version }}
