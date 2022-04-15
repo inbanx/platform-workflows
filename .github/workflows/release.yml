@@ -86,7 +86,7 @@ jobs:
       - name: Bump version and commit
         run: |
           npm version ${{ steps.get_draft_release_version.outputs.draft_release_version }} --no-git-tag-version
-          git add .
+          git add package.json
           git commit -m '[${{ steps.create.outputs.issue }}] Release ${{ steps.get_draft_release_version.outputs.draft_release_version }}'
 
       - name: Push changes
